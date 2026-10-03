@@ -177,7 +177,7 @@
                 </div>
                 <div class="mt-3">
                     <div class="d-flex justify-content-between">
-                        <small class="text-muted">最後更新: <span id="last-update">{{ moment().format('HH:mm:ss') }}</span></small>
+                        <small class="text-muted">最後更新: <span id="last-update"></span></small>
                         <button class="btn btn-sm btn-outline-info" onclick="refreshPage()">
                             <i class="fas fa-sync-alt me-1"></i>刷新
                         </button>
@@ -256,7 +256,6 @@ function getProgressBarClass(status) {
 
 function updateStatistics() {
     // 重新計算統計數據
-    const rows = document.querySelectorAll('#task-row-' + taskId);
     const totalTasks = {{ tasks|length }};
     const completedTasks = document.querySelectorAll('.badge.bg-primary').length;
     const runningTasks = document.querySelectorAll('.badge.bg-success').length;
@@ -273,6 +272,8 @@ function updateStatistics() {
 
     document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
 }
+
+document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
 
 function refreshPage() {
     location.reload();

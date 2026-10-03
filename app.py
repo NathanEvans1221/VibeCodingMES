@@ -101,10 +101,34 @@ def index():
     }
     return render_template('index.html', stats=stats)
 
+@app.route('/api/dashboard-stats')
+def dashboard_stats():
+    """取得首頁儀表板統計資料"""
+    return jsonify({
+        'production': mes_data.get_production_stats(),
+        'quality': mes_data.get_quality_stats(),
+        'equipment': {
+            'total': len(mes_data.equipment_list),
+            'running': sum(1 for eq in mes_data.equipment_list if eq['status'] == '運行中'),
+            'maintenance': sum(1 for eq in mes_data.equipment_list if eq['status'] == '維修中')
+        }
+    })
+
 @app.route('/production')
 def production():
     """生產流程監控頁面"""
     return render_template('production.html', tasks=mes_data.production_tasks)
+
+@app.route('/api/production-stats')
+def production_stats():
+    """取得生產任務統計資料"""
+    stats = mes_data.get_production_stats()
+    stats.update({
+        'running': sum(1 for task in mes_data.production_tasks if task['status'] == '進行中'),
+        'paused': sum(1 for task in mes_data.production_tasks if task['status'] == '暫停'),
+        'pending': sum(1 for task in mes_data.production_tasks if task['status'] == '待開始')
+    })
+    return jsonify(stats)
 
 @app.route('/production/update/<int:task_id>', methods=['POST'])
 def update_production_task(task_id):
@@ -143,6 +167,11 @@ def quality():
     stats = mes_data.get_quality_stats()
     return render_template('quality.html', records=mes_data.quality_records, stats=stats)
 
+@app.route('/api/quality-stats')
+def quality_stats():
+    """取得品質統計資料"""
+    return jsonify(mes_data.get_quality_stats())
+
 @app.route('/quality/add', methods=['POST'])
 def add_quality_record():
     """添加品質記錄"""
@@ -169,6 +198,15 @@ def add_quality_record():
 def equipment():
     """設備維護管理頁面"""
     return render_template('equipment.html', equipment=mes_data.equipment_list)
+
+@app.route('/api/equipment-stats')
+def equipment_stats():
+    """取得設備狀態統計資料"""
+    return jsonify({
+        'running': sum(1 for eq in mes_data.equipment_list if eq['status'] == '運行中'),
+        'maintenance': sum(1 for eq in mes_data.equipment_list if eq['status'] == '維修中'),
+        'standby': sum(1 for eq in mes_data.equipment_list if eq['status'] == '待命')
+    })
 
 @app.route('/equipment/update/<int:equipment_id>', methods=['POST'])
 def update_equipment_status(equipment_id):
